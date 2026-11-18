@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Exam · Assess | Student · Staff · Admin</title>
+    <!-- Fonts & Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #3b5b9b;        /* refined slate-blue */
+            --primary-dark: #2c4a7a;
+            --secondary: #42a5c5;      /* fresh teal */
+            --accent: #f7b731;          /* warm amber */
+            --dark: #1a2639;
+            --dark-2: #2d3a5e;
+            --light: #f4f7fc;
+            --light-2: #e9eef4;
+            --success: #3e9c7e;
+            --grad-1: #284184;
+            --grad-2: #3f659e;
+            --shadow-card: 0 20px 30px -10px rgba(26, 38, 57, 0.15);
+            --radius-card: 1.2rem;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--light);
+            color: var(--dark);
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 32px;
+        }
+
+        /* header with abstract vibe */
+        .header {
+            background: radial-gradient(ellipse at 80% 30%, #334e77, #121e30);
+            position: relative;
+            min-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MCIgaGVpZ2h0PSI4MCIgdmlld0JveD0iMCAwIDQwIDQwIj48cGF0aCBkPSJNMjAgMjBhMTAgMTAgMCAwIDEgMTAgMTAgMTAgMTAgMCAwIDEtMTAgMTAgMTAgMTAgMCAwIDEtMTAtMTAgMTAgMTAgMCAwIDEgMTAtMTB6IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMDMiLz48L3N2Zz4=') repeat;
+            opacity : 0.2;
+            pointer-events: none;
+        }
+
+        .navbar {
+            padding: 24px 0;
+            position: relative;
+            z-index: 10;
+        }
+
+        .navbar .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            background: rgba(255,255,255,0.12);
+            backdrop-filter: blur(8px);
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo-title {
+            font-size: 26px;
+            font-weight: 700;
+            color: white;
+            line-height: 1.2;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-subtitle {
+            font-size: 12px;
+            color: #b6c9e4;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 16px;
+            list-style: none;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 10px 20px;
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(4px);
+            transition: 0.2s;
+            font-size: 15px;
+        }
+
+        .nav-link i { font-size: 15px; }
+        .nav-link:hover, .nav-link.active {
+            background: var(--primary);
+            box-shadow: 0 8px 20px -8px #00000050;
+        }
+
+        /* hero */
+        .hero {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            padding: 50px 0 100px;
+            z-index: 5;
+        }
+
+        .hero-content {
+            max-width: 680px;
+            color: white;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(6px);
+            padding: 8px 18px;
+            border-radius: 60px;
+            font-weight: 500;
+            font-size: 14px;
+            border: 1px solid rgba(255,255,255,0.2);
+            margin-bottom: 30px;
+            gap: 8px;
+        }
+
+        .hero-badge i { color: var(--accent); }
+
+        .hero-title {
+            font-size: 60px;
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 24px;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .hero-title span {
+            background: linear-gradient(145deg, #f6e7a6, #f7b731);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: 20px;
+            color: #cfdff5;
+            margin-bottom: 40px;
+            max-width: 560px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 36px;
+            border-radius: 60px;
+            font-weight: 600;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.25s;
+            text-decoration: none;
+            background: white;
+            color: var(--dark);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 12px 28px -8px #1e2f4b;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: scale(1.02) translateY(-3px);
+            box-shadow: 0 24px 36px -10px #0c1729;
+        }
+
+        .btn-outline-light {
+            background: transparent;
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            backdrop-filter: blur(8px);
+        }
+
+        .btn-outline-light:hover {
+            border-color: white;
+            background: rgba(255,255,255,0.1);
+            transform: translateY(-3px);
+        }
+
+        /* portals section */
+        .section {
+            padding: 100px 0;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 70px;
+        }
+
+        .section-label {
+            display: inline-block;
+            background: rgba(59, 91, 155, 0.1);
+            padding: 6px 22px;
+            border-radius: 60px;
+            color: var(--primary-dark);
+            font-weight: 600;
+            font-size: 13px;
+            letter-spacing: 0.5px;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 44px;
+            color: var(--dark);
+            margin-bottom: 18px;
+        }
+
+        .section-subtitle {
+            font-size: 18px;
+            color: #4a5578;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .portals-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+
+        .portal-card {
+            background: white;
+            border-radius: var(--radius-card);
+            padding: 48px 28px 44px;
+            box-shadow: var(--shadow-card);
+            transition: all 0.3s ease;
+            border: 1px solid #eef3fd;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            backdrop-filter: blur(4px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .portal-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+
+        .portal-card:hover {
+            transform: translateY(-18px);
+            box-shadow: 0 32px 50px -16px #1e2d4e;
+            border-color: transparent;
+        }
+
+        .portal-icon {
+            width: 90px;
+            height: 90px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 38px;
+            margin-bottom: 32px;
+            background: linear-gradient(145deg, #eaeef9, white);
+            box-shadow: 0 8px 16px -6px #bac8e0;
+            color: var(--primary);
+            transition: 0.2s;
+        }
+
+        .portal-card:nth-child(2) .portal-icon { color: var(--secondary); }
+        .portal-card:nth-child(3) .portal-icon { color: var(--accent); }
+
+        .portal-title {
+            font-size: 26px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .portal-description {
+            color: #2f3b5c;
+            margin-bottom: 30px;
+            flex: 1;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .portal-btn {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            border-radius: 60px;
+            padding: 14px 38px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.2s;
+            text-decoration: none;
+        }
+
+        .portal-btn i { font-size: 16px; }
+        .portal-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            transform: scale(0.98);
+        }
+
+        /* features / AI highlights */
+        .features {
+            background: #f0f4fc;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 28px;
+        }
+
+        .feature-item {
+            background: white;
+            border-radius: 28px;
+            padding: 38px 28px;
+            box-shadow: 0 12px 28px -10px rgba(39, 55, 94, 0.1);
+            transition: 0.2s;
+            border: 1px solid #e2edff;
+        }
+
+        .feature-item:hover {
+            background: #ffffff;
+            box-shadow: 0 22px 40px -14px #24385630;
+        }
+
+        .feature-icon {
+            background: linear-gradient(135deg, #e3ebff, white);
+            width: 64px;
+            height: 64px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: var(--primary);
+            margin-bottom: 28px;
+        }
+
+        .feature-item h3 {
+            font-size: 22px;
+            margin-bottom: 14px;
+        }
+
+        .feature-item p {
+            color: #31415f;
+            line-height: 1.6;
+        }
+
+        /* workflow (daily pulse) */
+        .workflow-steps {
+            display: flex;
+            gap: 20px;
+            margin: 70px 0 20px;
+        }
+
+        .step {
+            background: white;
+            padding: 40px 28px;
+            border-radius: 32px;
+            box-shadow: 0 20px 32px -20px #19273e;
+            flex: 1;
+            border-bottom: 4px solid var(--primary);
+            transition: 0.25s;
+        }
+
+        .step:hover { transform: scale(1.02); }
+        .step .step-number {
+            font-size: 48px;
+            font-weight: 800;
+            color: var(--primary);
+            opacity: 0.25;
+            line-height: 1;
+            margin-bottom: 16px;
+        }
+
+        .step h3 { font-size: 22px; margin-bottom: 16px; }
+        .step p { color: #1e2b46; }
+
+        /* footer */
+        .footer {
+            background: #121e30;
+            color: white;
+            padding: 70px 0 30px;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 60px;
+            margin-bottom: 50px;
+        }
+
+        .footer-col p { color: #a3b8d4; margin: 24px 0; line-height: 1.7; }
+        .footer-links { list-style: none; }
+        .footer-links li { margin-bottom: 16px; }
+        .footer-links a { color: #cbd6ec; text-decoration: none; display: flex; align-items: center; gap: 10px; transition: 0.2s; }
+        .footer-links a:hover { color: white; padding-left: 6px; }
+
+        .social {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .social a {
+            background: #263b58;
+            width: 44px;
+            height: 44px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            transition: 0.2s;
+        }
+        .social a:hover { background: var(--primary); transform: translateY(-5px); }
+
+        .footer-bottom {
+            border-top: 1px solid #263b58;
+            padding-top: 30px;
+            text-align: center;
+            color: #96abca;
+        }
+
+        /* mobile adjustments */
+        @media (max-width: 1000px) {
+            .portals-grid, .features-grid, .workflow-steps, .footer-grid {
+                grid-template-columns: 1fr;
+            }
+            .hero-title { font-size: 44px; }
+            .nav-links { display: none; } /* keep demo simple */
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <nav class="navbar">
+            <div class="container">
+                <a href="#" class="logo">
+                    <div class="logo-icon"><i class="fas fa-brain"></i></div>
+                    <div class="logo-text">
+                        <div class="logo-title">EduAssess AI</div>
+                        <div class="logo-subtitle">exam · insight · adaptive</div>
+                    </div>
+                </a>
+                <!-- simplified navigation -->
+                <ul class="nav-links">
+                    <li><a href="#home" class="nav-link active"><i class="fas fa-home"></i> Home</a></li>
+                    <li><a href="#portals" class="nav-link"><i class="fas fa-credit-card"></i> Portals</a></li>
+                    <li><a href="#ai-features" class="nav-link"><i class="fas fa-robot"></i> AI</a></li>
+                    <li><a href="#contact" class="nav-link"><i class="fas fa-envelope"></i> Contact</a></li>
+                </ul>
+            </div>
+        </nav>
+        <div class="hero" id="home">
+            <div class="container">
+                <div class="hero-content">
+                    <div class="hero-badge"><i class="fas fa-bolt"></i> real‑time AI assessment</div>
+                    <h1 class="hero-title">Teach → AI generates exam → <span>instant insight</span></h1>
+                    <p class="hero-subtitle">Staff inputs a topic, AI builds questions. Students answer immediately – performance tracked daily. Close learning gaps in real time.</p>
+                    <div class="hero-actions" style="display: flex; gap: 16px;">
+                        <a href="#portals" class="btn btn-primary"><i class="fas fa-sign-in-alt"></i> Access portal</a>
+                        <a href="#ai-features" class="btn btn-outline-light"><i class="fas fa-play"></i> How it works</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- three portals (student, staff, admin) exactly from abstract -->
+    <section class="section" id="portals">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label"><i class="fas fa-clipboard-list"></i> three‑module system</span>
+                <h2 class="section-title">Your role. Your dashboard.</h2>
+                <p class="section-subtitle">Student · Staff · Admin — each with AI‑driven tools to master the learning cycle.</p>
+            </div>
+            <div class="portals-grid">
+                <!-- Student portal -->
+                <div class="portal-card">
+                    <div class="portal-icon"><i class="fas fa-user-graduate"></i></div>
+                    <h3 class="portal-title">Student</h3>
+                    <p class="portal-description">Register, choose department, take AI‑generated exams, get instant scores & visual progress trackers. See your daily understanding.</p>
+                    <a href="/studentlogin" class="portal-btn"><i class="fas fa-arrow-right"></i> Student login</a>
+                </div>
+                <!-- Staff portal (teacher) -->
+                <div class="portal-card">
+                    <div class="portal-icon"><i class="fas fa-chalkboard-teacher"></i></div>
+                    <h3 class="portal-title">Staff</h3>
+                    <p class="portal-description">After each topic, describe it to the AI → auto generates questions. Monitor answers, evaluate, and view live student comprehension charts.</p>
+                    <a href="/staff/login" class="portal-btn"><i class="fas fa-arrow-right"></i> Staff login</a>
+                </div>
+                <!-- Admin portal -->
+                <div class="portal-card">
+                    <div class="portal-icon"><i class="fas fa-user-tie"></i></div>
+                    <h3 class="portal-title">Admin</h3>
+                    <p class="portal-description">Complete oversight: student/staff data, marks, cross‑class performance dashboards. AI‑driven analytics and institution management.</p>
+                    <a href="/adminlogin" class="portal-btn"><i class="fas fa-arrow-right"></i> Admin login</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- AI feature highlights (replaces generic features) -->
+    <section class="section features" id="ai-features">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label"><i class="fas fa-microchip"></i> powered by AI</span>
+                <h2 class="section-title">beyond periodic exams</h2>
+                <p class="section-subtitle">From topic description to instant assessment – no more waiting for gaps to widen.</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-pen-fancy"></i></div>
+                    <h3>AI question generator</h3>
+                    <p>Staff describes a just‑finished topic (e.g., “quadratic equations”) – the system instantly creates fresh MCQ or descriptive questions.</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
+                    <h3>daily progress tracking</h3>
+                    <p>Every student's answer is evaluated in real time. Teachers see exactly who understood and who needs support – that very day.</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-user-check"></i></div>
+                    <h3>targeted intervention</h3>
+                    <p>Alerts for struggling students. Staff can offer personalised support, while the dashboard reflects improved retention.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- workflow: how the daily pulse works (4 steps) -->
+    <section class="section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label"><i class="fas fa-sync-alt"></i> daily rhythm</span>
+                <h2 class="section-title">from lesson to insight</h2>
+                <p class="section-subtitle">Close the loop every day – not just at finals.</p>
+            </div>
+            <div class="workflow-steps">
+                <div class="step"><div class="step-number">1</div><h3>✏️ Topic finished</h3><p>Staff marks a lesson as complete & describes it in simple terms to the AI.</p></div>
+                <div class="step"><div class="step-number">2</div><h3>🤖 AI crafts questions</h3><p>System generates relevant, levelled questions and pushes them to students' portals.</p></div>
+                <div class="step"><div class="step-number">3</div><h3>📱 Students respond</h3><p>Instant assessment – during class or as a quick quiz. Auto‑evaluation.</p></div>
+                <div class="step"><div class="step-number">4</div><h3>📊 live dashboard</h3><p>Staff views comprehension analytics, intervenes with at‑risk students immediately.</p></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- footer with contact / abstract summary -->
+    <footer class="footer" id="contact">
+        <div class="container">
+            <div class="footer-grid">
+                <div>
+                    <h3 style="display: flex; gap: 10px; align-items: center;"><i class="fas fa-robot" style="color: var(--accent);"></i> EduAssess AI</h3>
+                    <p>Spring Boot · three‑module examination system that tracks daily understanding, not just final exams. AI closes the gap between teaching and learning.</p>
+                    <div class="social">
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-github"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h4>Portals</h4>
+                    <ul class="footer-links">
+                        <li><a href="#"><i class="fas fa-user-graduate"></i> Student access</a></li>
+                        <li><a href="#"><i class="fas fa-chalkboard-teacher"></i> Staff access</a></li>
+                        <li><a href="#"><i class="fas fa-user-tie"></i> Admin access</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>Abstract</h4>
+                    <ul class="footer-links">
+                        <li><a href="#"><i class="fas fa-file-alt"></i> AI generation</a></li>
+                        <li><a href="#"><i class="fas fa-chart-pie"></i> daily tracking</a></li>
+                        <li><a href="#"><i class="fas fa-shield-alt"></i> targeted support</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 EduAssess – AI examination & assessment. Built on Spring Boot.  (demo UI for project abstract)</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- smooth scroll and tiny active class (minimal) -->
+    <script>
+        (function() {
+            // active link highlight while scrolling (simplified)
+            const sections = document.querySelectorAll("section[id], header[id]");
+            const navLinks = document.querySelectorAll(".nav-link");
+            window.addEventListener("scroll", () => {
+                let current = "";
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop - 100;
+                    if (scrollY >= sectionTop) {
+                        current = section.getAttribute("id") || "home";
+                    }
+                });
+                navLinks.forEach(link => {
+                    link.classList.remove("active");
+                    const href = link.getAttribute("href").replace("#", "");
+                    if (href === current) link.classList.add("active");
+                });
+            });
+
+            // smooth click
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener("click", function(e) {
+                    e.preventDefault();
+                    const id = this.getAttribute("href");
+                    if (id === "#") return;
+                    const target = document.querySelector(id);
+                    if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+                });
+            });
+        })();
+    </script>
+</body>
+</html>

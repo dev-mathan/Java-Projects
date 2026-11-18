@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>My Results</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #f4f7fc;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: center;
+        }
+
+        th {
+            background: #2563eb;
+            color: white;
+        }
+
+        .pass {
+            color: green;
+            font-weight: bold;
+        }
+
+        .fail {
+            color: red;
+            font-weight: bold;
+        }
+
+        .btn {
+            margin-top: 20px;
+            display: inline-block;
+            padding: 10px 20px;
+            background: #2563eb;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- ✅ Student Info -->
+    <h2>
+        Welcome, <span th:text="${student.name}">Student</span>
+    </h2>
+
+    <p>
+        Department: <b th:text="${student.department}">Dept</b> |
+        Year: <b th:text="${student.year}">Year</b>
+    </p>
+
+    <!-- ✅ Results Table -->
+    <table>
+        <thead>
+            <tr>
+                <th>Score</th>
+                <th>Total</th>
+                <th>Percentage</th>
+                <th>Status</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <tr th:each="mark : ${marksList}">
+                
+                <td th:text="${mark.score}"></td>
+
+                <td th:text="${mark.total}"></td>
+
+                <!-- Percentage -->
+                <td th:text="${mark.total > 0} ? ${#numbers.formatDecimal((mark.score * 100 / mark.total), 1, 1)} + '%' : '0%'"></td>
+
+                <!-- Status -->
+                <td>
+                    <span th:class="${(mark.score * 100 / mark.total) >= 40} ? 'pass' : 'fail'"
+                          th:text="${(mark.score * 100 / mark.total) >= 40} ? 'PASS' : 'FAIL'">
+                    </span>
+                </td>
+
+                <td th:text="${mark.examDate}"></td>
+
+            </tr>
+
+            <!-- No Data -->
+            <tr th:if="${marksList.isEmpty()}">
+                <td colspan="5">No Results Found</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Back -->
+    <a href="/student/home" class="btn">⬅ Back</a>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Student Monitoring System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* ----- global design tokens (clean white with yellow top) ----- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #f39c12;          /* warm yellow-orange */
+            --primary-dark: #e67e22;      /* darker orange */
+            --secondary: #f1c40f;         /* bright yellow */
+            --dark: #2c3e50;               /* dark blue for text */
+            --dark-2: #34495e;
+            --light-gray: #f8f9fa;
+            --border-color: #e9ecef;
+            --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.05);
+            --radius-card: 1rem;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            background: white;
+            color: var(--dark);
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-image: 
+                linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.95) 100%),
+                url('https://www.kayak.co.in/rimg/kimg/b5/03/8b49974033802d76.jpg?width=1366&height=768&crop=true');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 32px;
+        }
+
+        /* ----- header with yellow only at top ----- */
+        .header {
+            background: linear-gradient(135deg, #f39c12, #f1c40f);
+            position: relative;
+            padding: 40px 0 40px;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 14px;
+            text-decoration: none;
+            margin-bottom: 8px;
+        }
+
+        .logo-icon {
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(4px);
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+        }
+
+        .logo-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: white;
+            line-height: 1.2;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-subtitle {
+            font-size: 11px;
+            color: #fff9e6;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.9;
+        }
+
+        .page-title {
+            font-size: 32px;
+            font-weight: 600;
+            color: white;
+            margin-top: 4px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 2;
+        }
+
+        /* ----- admin login section – clean white background ----- */
+        .admin-section {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 60px 20px;
+            background: white;
+        }
+
+        .form-container {
+            background: white;
+            border-radius: var(--radius-card);
+            box-shadow: var(--shadow-card);
+            padding: 45px 40px;
+            width: 100%;
+            max-width: 460px;
+            border: 1px solid var(--border-color);
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .admin-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #fef9e7;
+            padding: 6px 18px;
+            border-radius: 30px;
+            margin-bottom: 18px;
+            color: #f39c12;
+            font-weight: 600;
+            font-size: 13px;
+            border: 1px solid #fdebd0;
+        }
+
+        .admin-badge i {
+            font-size: 14px;
+        }
+
+        .form-header h2 {
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 8px;
+        }
+
+        .form-header p {
+            color: #6c757d;
+            font-size: 15px;
+        }
+
+        /* stats preview for student monitoring theme */
+        .stats-preview {
+            display: flex;
+            justify-content: space-around;
+            margin: 25px 0 20px;
+            padding: 15px 0;
+            border-top: 1px dashed var(--border-color);
+            border-bottom: 1px dashed var(--border-color);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 22px;
+            font-weight: 700;
+            color: #f39c12;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* ----- form styling – clean and minimal ----- */
+        .admin-form {
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: var(--dark-2);
+            font-size: 14px;
+        }
+
+        .input-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #adb5bd;
+            font-size: 16px;
+            z-index: 1;
+            transition: color 0.2s;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 20px 14px 48px;
+            border: 1.5px solid #dee2e6;
+            border-radius: 10px;
+            font-size: 15px;
+            background: white;
+            transition: all 0.2s;
+            color: var(--dark);
+        }
+
+        input:focus {
+            border-color: #f39c12;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.1);
+        }
+
+        input:focus + .input-icon {
+            color: #f39c12;
+        }
+
+        input::placeholder {
+            color: #adb5bd;
+            font-size: 14px;
+        }
+
+        /* error message styling */
+        .error-message {
+            color: #e74c3c;
+            font-size: 12px;
+            margin-top: 5px;
+            margin-left: 10px;
+            display: none;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .error-message i {
+            font-size: 11px;
+        }
+
+        input:invalid:not(:placeholder-shown) {
+            border-color: #e74c3c;
+        }
+
+        input:invalid:not(:placeholder-shown) ~ .error-message {
+            display: flex;
+        }
+
+        /* button – yellow theme */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 15px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #f39c12;
+            color: white;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background: #e67e22;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(243, 156, 18, 0.3);
+        }
+
+        .btn i {
+            font-size: 16px;
+        }
+
+        /* security notice */
+        .security-notice {
+            margin-top: 25px;
+            padding: 14px 18px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #6c757d;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .security-notice i {
+            color: #f39c12;
+            font-size: 16px;
+        }
+
+        /* two-factor toggle */
+        .two-factor-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 5px 0;
+        }
+
+        .two-factor-toggle input {
+            width: auto;
+            accent-color: #f39c12;
+        }
+
+        .two-factor-toggle label {
+            margin-bottom: 0;
+            font-size: 13px;
+            color: #6c757d;
+        }
+
+        /* Loading state */
+        .btn-loading .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* footer links */
+        .form-footer {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: #6c757d;
+            text-decoration: none;
+            font-size: 13px;
+            transition: color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .footer-links a:hover {
+            color: #f39c12;
+        }
+
+        .footer-links a i {
+            font-size: 12px;
+        }
+
+        .copyright {
+            margin-top: 15px;
+            font-size: 12px;
+            color: #adb5bd;
+        }
+
+        @media (max-width: 500px) {
+            .form-container {
+                padding: 30px 20px;
+            }
+            
+            .stats-preview {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header – yellow only at top, clean design -->
+    <header class="header">
+        <div class="container">
+            <a href="#" class="logo">
+                <div class="logo-icon"><i class="fas fa-chart-line"></i></div>
+                <div class="logo-text">
+                    <div class="logo-title">Student Monitor</div>
+                    <div class="logo-subtitle">admin · analytics · insights</div>
+                </div>
+            </a>
+            <h1 class="page-title">Admin Control Panel</h1>
+        </div>
+    </header>
+
+    <!-- Admin Login Section – clean white background with student monitoring content -->
+    <section class="admin-section">
+        <div class="form-container">
+     
+            <!-- YOUR EXACT FORM with all backend attributes preserved -->
+            <form class="admin-form" id="adminLoginForm" action="/admin/login" method="post">
+                <div class="form-group">
+                    <label for="admin-username">Admin ID</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-user input-icon"></i>
+                        <input type="text" id="admin-username" name="username" placeholder="Enter your admin ID" required>
+                    </div>
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-circle"></i>
+                        Please enter your admin ID
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="admin-password">Password</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock input-icon"></i>
+                        <input type="password" id="admin-password" name="password" placeholder="Enter your password" required minlength="8">
+                    </div>
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-circle"></i>
+                        Password must be at least 8 characters
+                    </div>
+                </div>
+         
+                
+                <!-- Your button with ID preserved -->
+                <button type="submit" class="btn" id="loginBtn">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>Access Monitoring Dashboard</span>
+                </button>
+                
+                <!-- Your security notice preserved with monitoring context -->
+                <div class="security-notice">
+                    <i class="fas fa-lock"></i>
+                    <span>This area contains sensitive student data. Always log out after your monitoring session.</span>
+                </div>
+            </form>
+
+            <!-- Footer links with student monitoring context -->
+            <div class="form-footer">
+                <div class="footer-links">
+                    <a href="#"><i class="fas fa-question-circle"></i> Admin Guide</a>
+                    <a href="#"><i class="fas fa-chart-bar"></i> Reports</a>
+                    <a href="#"><i class="fas fa-cog"></i> Settings</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</body>
+</html>

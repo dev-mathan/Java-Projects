@@ -1,0 +1,15 @@
+# Java / Maven
+**/target/
+**/build/
+**/bin/
+**/out/
+
+# IDE
+**/.idea/
+**/.metadata/
+**/*.iml
+
+# Secrets
+**/.env
+**/.env.*
+!**/.env.example

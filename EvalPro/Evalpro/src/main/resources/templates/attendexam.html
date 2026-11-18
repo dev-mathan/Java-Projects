@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Student exam · MCQ assessment</title>
+    <!-- modern font & icons (no backend impact) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* professional, clean, exam-focused design */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: #f2f6fc;  /* very light airy blue */
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            margin: 0;
+            padding: 40px 24px;
+            line-height: 1.5;
+            color: #1e2f44;
+        }
+
+        /* main exam card – elevated, spacious */
+        .exam-wrapper {
+            max-width: 950px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 36px;
+            box-shadow: 0 30px 50px -20px rgba(0, 35, 70, 0.25), 0 10px 20px rgba(0, 20, 40, 0.08);
+            padding: 40px 48px;
+            transition: all 0.2s;
+        }
+
+        /* header with icon and title */
+        .exam-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e9f0f8;
+            padding-bottom: 24px;
+        }
+
+        .exam-header i {
+            font-size: 2.2rem;
+            color: #1b4c7c;
+            background: #e7f1fb;
+            padding: 14px;
+            border-radius: 20px;
+            box-shadow: inset 0 1px 4px rgba(0,0,0,0.02);
+        }
+
+        .exam-header h2 {
+            font-weight: 600;
+            font-size: 2rem;
+            letter-spacing: -0.02em;
+            color: #0a2b44;
+            margin: 0;
+        }
+
+        .status-chip {
+            background: #dcebf9;
+            color: #145388;
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding: 6px 18px;
+            border-radius: 50px;
+            margin-left: 18px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* progress / meta bar */
+        .progress-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f6faff;
+            border-radius: 60px;
+            padding: 12px 24px;
+            margin: 20px 0 32px;
+            border: 1px solid #dbe5f2;
+        }
+
+        .progress-meta .q-count {
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #1a4972;
+        }
+
+        .progress-meta .q-count i {
+            font-size: 1.3rem;
+            color: #2a67a5;
+        }
+
+        .badge-light {
+            background: white;
+            border-radius: 40px;
+            padding: 6px 20px;
+            font-weight: 600;
+            border: 1px solid #c2d6ec;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+            color: #0b3a5e;
+        }
+
+        .badge-light i {
+            margin-right: 6px;
+            color: #0f5e9e;
+        }
+
+        /* question cards – clean, subtle separation */
+        .question-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            margin: 30px 0 40px;
+            max-height: 540px;
+            overflow-y: auto;
+            padding-right: 8px;
+        }
+
+        /* custom scroll (barely visible) */
+        .question-stack::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .question-stack::-webkit-scrollbar-track {
+            background: #ecf2f9;
+            border-radius: 10px;
+        }
+
+        .question-stack::-webkit-scrollbar-thumb {
+            background: #b8ceea;
+            border-radius: 10px;
+        }
+
+        /* modern question card */
+        .question-card {
+            background: #ffffff;
+            border: 1px solid #dde7f3;
+            border-radius: 28px;
+            padding: 24px 28px;
+            transition: all 0.15s ease;
+            box-shadow: 0 6px 14px rgba(0, 30, 60, 0.03);
+        }
+
+        .question-card:hover {
+            border-color: #b3cef0;
+            box-shadow: 0 12px 22px -12px rgba(18, 70, 120, 0.18);
+        }
+
+        /* question header with number */
+        .question-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .q-num {
+            background: #e1edfc;
+            color: #1e4f7c;
+            font-weight: 700;
+            font-size: 1.2rem;
+            width: 46px;
+            height: 46px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 30px;
+            border: 2px solid white;
+            box-shadow: 0 4px 8px rgba(0, 55, 110, 0.1);
+        }
+
+        .q-text {
+            font-weight: 600;
+            font-size: 1.18rem;
+            color: #132e48;
+            line-height: 1.4;
+            flex: 1;
+        }
+
+        /* option list – modern, accessible */
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .option-row {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px 12px 20px;
+            background: #f9fcff;
+            border-radius: 40px;
+            border: 1px solid #e2ecf7;
+            transition: background 0.1s, border-color 0.1s;
+            cursor: pointer;
+        }
+
+        .option-row:hover {
+            background: #f0f7ff;
+            border-color: #abc5e2;
+        }
+
+        /* hide default radio, create custom one */
+        .option-row input[type="radio"] {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 22px;
+            height: 22px;
+            border: 2px solid #b6cde0;
+            border-radius: 50%;
+            margin-right: 18px;
+            position: relative;
+            cursor: pointer;
+            transition: 0.1s;
+            background: white;
+        }
+
+        .option-row input[type="radio"]:checked {
+            border-color: #1f6fb0;
+            background: #1f6fb0;
+            box-shadow: inset 0 0 0 5px white, 0 0 0 2px #a0c3e8; /* inner dot effect */
+        }
+
+        .option-row input[type="radio"]:focus-visible {
+            outline: 2px solid #7fa9d0;
+            outline-offset: 2px;
+        }
+
+        .option-prefix {
+            font-weight: 600;
+            color: #1e4f7a;
+            width: 32px;
+            font-size: 1.1rem;
+        }
+
+        .option-text {
+            color: #1c3e5e;
+            font-weight: 500;
+        }
+
+        /* keep original th:text binding, style stays */
+        /* optional small hint */
+        .q-meta-tag {
+            margin-left: auto;
+            background: #ecf3fb;
+            border-radius: 30px;
+            padding: 4px 14px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #23629c;
+        }
+
+        /* submit area */
+        .submit-section {
+            display: flex;
+            justify-content: flex-end;
+            border-top: 2px solid #e5eef9;
+            padding-top: 32px;
+            margin-top: 18px;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #0b3b62, #165a8f);
+            border: none;
+            color: white;
+            font-weight: 600;
+            font-size: 1.25rem;
+            padding: 18px 50px;
+            border-radius: 50px;
+            display: inline-flex;
+            align-items: center;
+            gap: 18px;
+            box-shadow: 0 18px 28px -12px #0f4670b3;
+            transition: all 0.2s;
+            border: 1px solid rgba(255,255,255,0.2);
+            cursor: pointer;
+            letter-spacing: 0.3px;
+        }
+
+        .submit-btn i {
+            font-size: 1.4rem;
+        }
+
+        .submit-btn:hover {
+            background: linear-gradient(135deg, #124e79, #0f3f62);
+            box-shadow: 0 22px 32px -12px #0e3d61;
+            transform: translateY(-2px);
+        }
+
+        .submit-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 10px 20px -8px #0e3d61;
+        }
+
+        /* note/instruction */
+        .instruction-note {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #eaf2fc;
+            border-radius: 50px;
+            padding: 8px 24px;
+            width: fit-content;
+            margin-bottom: 20px;
+            color: #1f4d79;
+            font-size: 0.95rem;
+        }
+
+        /* all original thymeleaf attributes preserved */
+    </style>
+</head>
+<body>
+<div class="exam-wrapper">
+
+    <!-- header with enhanced look -->
+    <div class="exam-header">
+        <i class="fas fa-file-pen"></i>
+        <h2>MCQ assessment</h2>
+        <span class="status-chip"><i class="fas fa-shield-alt"></i> in progress</span>
+    </div>
+
+    <!-- progress indicator (dynamic from model, only ui) -->
+    <div class="progress-meta">
+        <div class="q-count">
+            <i class="fas fa-rectangle-list"></i>
+            <span>Questions overview</span>
+        </div>
+        <div class="badge-light" th:text="'📌 ' + ${mcqs.size()} + ' items'">
+            <!-- filled by thymeleaf -->
+        </div>
+    </div>
+
+    <!-- small tip (purely visual) -->
+    <div class="instruction-note">
+        <i class="fas fa-circle-info"></i>
+        <span>Select one answer per question. You can change later.</span>
+    </div>
+
+    <!-- question loop – unchanged th attributes, only ui structure enhanced -->
+<form th:action="@{/student/submitExam}" method="post" class="questions-form">
+        <div class="question-stack">
+            <div th:each="mcq, iterStat : ${mcqs}" class="question-card">
+
+                <!-- question header with number + text (structure modified, but th attributes exactly as before inside) -->
+                <div class="question-header">
+                    <span class="q-num" th:text="${iterStat.count}">1</span>
+                    <!-- we keep the exact bold text from original but now inside q-text span -->
+                    <span class="q-text">
+                        <b th:text="${iterStat.count} + '. ' + ${mcq.question}">1. Sample question</b>
+                    </span>
+                    <!-- decorative tag (no backend effect) -->
+                    <span class="q-meta-tag"><i class="far fa-circle"></i> MCQ</span>
+                </div>
+
+                <!-- options – same th:name etc., restructured with clean divs -->
+                <div class="options-container">
+
+                    <!-- option A -->
+                    <div class="option-row">
+                        <input type="radio" th:name="'answer_' + ${mcq.id}" value="A">
+                        <span class="option-prefix">A)</span>
+                        <span class="option-text" th:text="${mcq.optionA}">Option A</span>
+                    </div>
+
+                    <!-- option B -->
+                    <div class="option-row">
+                        <input type="radio" th:name="'answer_' + ${mcq.id}" value="B">
+                        <span class="option-prefix">B)</span>
+                        <span class="option-text" th:text="${mcq.optionB}">Option B</span>
+                    </div>
+
+                    <!-- option C -->
+                    <div class="option-row">
+                        <input type="radio" th:name="'answer_' + ${mcq.id}" value="C">
+                        <span class="option-prefix">C)</span>
+                        <span class="option-text" th:text="${mcq.optionC}">Option C</span>
+                    </div>
+
+                    <!-- option D -->
+                    <div class="option-row">
+                        <input type="radio" th:name="'answer_' + ${mcq.id}" value="D">
+                        <span class="option-prefix">D)</span>
+                        <span class="option-text" th:text="${mcq.optionD}">Option D</span>
+                    </div>
+
+                </div> <!-- end options container -->
+            </div> <!-- end question-card -->
+        </div> <!-- end question-stack -->
+
+        <!-- submit button (enriched, but same type & class) -->
+       <button type="submit" class="submit-btn"
+        onclick=" confirm('Are you sure you want to submit the exam?');">
+    <span>Submit exam</span>
+    <i class="fas fa-paper-plane"></i>
+</button>
+
+    </form>
+
+    <!-- tiny footer note (purely decorative) -->
+    <div style="margin-top: 24px; text-align: right; font-size: 0.85rem; color: #6487a5;">
+        <i class="far fa-clock"></i> your answers are saved locally
+    </div>
+</div> <!-- end exam-wrapper -->
+
+<!-- no backend code harmed — all th attributes untouched -->
+</body>
+</html>

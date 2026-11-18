@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Apply Department</title>
+</head>
+<body>
+
+<h2>Department Application Form</h2>
+
+<form th:action="@{/department/apply}" th:object="${application}" method="post">
+
+    <label>Name:</label>
+    <input type="text" th:field="*{studentName}" required/><br><br>
+
+    <label>Email:</label>
+    <input type="email" th:field="*{email}" required/><br><br>
+
+    <label>Department:</label>
+    <select th:field="*{department}">
+        <option value="Computer Science">Computer Science</option>
+        <option value="Mechanical">Mechanical</option>
+        <option value="Civil">Civil</option>
+        <option value="Leather Technology">Leather Technology</option>
+    </select><br><br>
+
+    <label>Qualification:</label>
+    <input type="text" th:field="*{qualification}" required/><br><br>
+
+    <label>Mobile:</label>
+    <input type="text" th:field="*{mobile}" required/><br><br>
+
+    <button type="submit">Apply</button>
+
+</form>
+
+</body>
+</html>

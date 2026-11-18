@@ -1,0 +1,13 @@
+package com.example.banking_application.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.example.banking_application.entity.User;
+
+public interface UserRepository
+        extends JpaRepository<User, Long> {
+
+    boolean existsByEmail(String email);
+
+    boolean existsByPhone(String phone);
+}
