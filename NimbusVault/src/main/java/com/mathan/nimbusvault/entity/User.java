@@ -2,10 +2,11 @@
 package com.mathan.nimbusvault.entity;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
-
+import com.mathan.nimbusvault.entity.User;
 import com.mathan.nimbusvault.enums.AuthProvider;
 import com.mathan.nimbusvault.enums.Role;
+import java.util.UUID;
+
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -67,4 +68,5 @@ public class User {
         updatedAt = LocalDateTime.now();
     }
 
+    
 }
