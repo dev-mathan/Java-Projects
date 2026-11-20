@@ -1,6 +1,11 @@
 package com.mathan.nimbusvault.service;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
+import com.mathan.nimbusvault.exception.InvalidCredentialsException;
+import com.mathan.nimbusvault.dto.request.RefreshTokenRequest;
+import com.mathan.nimbusvault.dto.request.LoginRequest;
+import com.mathan.nimbusvault.dto.response.AuthResponse;
+import com.mathan.nimbusvault.entity.RefreshToken;
 import org.springframework.stereotype.Service;
 
 import com.mathan.nimbusvault.dto.request.RegisterRequest;
@@ -18,6 +23,10 @@ public class AuthService {
     private final UserRepository userRepository;
     
     private final PasswordEncoder passwordEncoder;
+    
+    private final JwtService jwtService;
+
+    private final RefreshTokenService refreshTokenService;
 
     @Transactional
     public void register(RegisterRequest request) {
@@ -42,4 +51,51 @@ public class AuthService {
         userRepository.save(user);
     }
   
+    @Transactional
+    public AuthResponse login(LoginRequest request) {
+
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new InvalidCredentialsException("Invalid email or password"));
+
+        if (!Boolean.TRUE.equals(user.getEnabled())) {
+            throw new RuntimeException("Account is disabled");
+        }
+
+        if (!passwordEncoder.matches(
+                request.getPassword(), user.getPassword())) {
+        	throw new InvalidCredentialsException("Invalid email or password");
+        }
+
+        String accessToken = jwtService.generateToken(user.getEmail());
+
+        RefreshToken refreshToken =
+                refreshTokenService.createRefreshToken(user);
+
+        return new AuthResponse(
+                accessToken,
+                refreshToken.getToken(),
+                "Bearer"
+        );
+    }
+    @Transactional
+    public AuthResponse refreshAccessToken(RefreshTokenRequest request) {
+
+        RefreshToken oldToken =
+                refreshTokenService.verifyRefreshToken(request.getRefreshToken());
+
+        User user = oldToken.getUser();
+
+        refreshTokenService.revokeRefreshToken(oldToken);
+
+        String accessToken = jwtService.generateToken(user.getEmail());
+
+        RefreshToken newRefreshToken =
+                refreshTokenService.createRefreshToken(user);
+
+        return new AuthResponse(
+                accessToken,
+                newRefreshToken.getToken(),
+                "Bearer"
+        );
+    }
 }

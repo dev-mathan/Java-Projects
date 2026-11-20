@@ -22,3 +22,7 @@ minio:
   access-key: ${MINIO_ACCESS_KEY}
   secret-key: ${MINIO_SECRET_KEY}
   bucket-name: ${MINIO_BUCKET:nimbusvault-files}
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: 900000
