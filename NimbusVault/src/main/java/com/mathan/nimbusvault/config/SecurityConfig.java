@@ -26,9 +26,19 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
 
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/v1/auth/**").permitAll()
-                .anyRequest().authenticated()
-            )
+            	    .requestMatchers(
+            	        "/api/v1/auth/register",
+            	        "/api/v1/auth/login",
+            	        "/api/v1/auth/refresh-token",
+            	        "/api/v1/auth/verify-email",
+            	        "/api/v1/auth/google",
+            	        "/api/v1/auth/forgot-password",
+            	        "/api/v1/auth/forgot-password/**",
+            	        "/api/v1/auth/verify-mobile-otp",
+            	        "/api/v1/auth/reset-password"
+            	    ).permitAll()
+            	    .anyRequest().authenticated()
+            	)
 
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)

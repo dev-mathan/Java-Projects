@@ -28,4 +28,7 @@ public class RegisterRequest {
         message = "Password must contain one uppercase letter, one lowercase letter, one number, and one special character")
     private String password;
 
+    @NotBlank(message = "Mobile number is required")
+    @Pattern(regexp = "^[6-9][0-9]{9}$",message = "Enter a valid 10-digit Indian mobile number")
+    private String mobileNumber;
 }

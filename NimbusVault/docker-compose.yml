@@ -1,5 +1,5 @@
-
 services:
+
   postgres:
     image: postgres:16
     container_name: nimbus-postgres
@@ -36,6 +36,13 @@ services:
       - "5050:80"
     volumes:
       - pgadmin_data:/var/lib/pgadmin
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: nimbus-mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
 
 volumes:
   pgdata:

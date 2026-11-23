@@ -57,6 +57,12 @@ public class User {
 
     private LocalDateTime updatedAt;
     
+    @Column(unique = true, length = 15)
+    private String mobileNumber;
+
+    @Column(nullable = false)
+    private Boolean mobileVerified = false;
+    
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
