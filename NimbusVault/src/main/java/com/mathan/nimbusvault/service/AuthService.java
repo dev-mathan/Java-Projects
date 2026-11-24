@@ -2,8 +2,17 @@
 package com.mathan.nimbusvault.service;
 
 import java.security.SecureRandom;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+
 import com.mathan.nimbusvault.dto.request.VerifyPasswordResetOtpRequest;
 import com.mathan.nimbusvault.dto.request.VerifyMobileRequest;
+import java.util.UUID;
+import com.mathan.nimbusvault.entity.EmailVerificationToken;
+import com.mathan.nimbusvault.repository.EmailVerificationTokenRepository;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +23,7 @@ import com.mathan.nimbusvault.dto.request.ForgotPasswordRequest;
 import com.mathan.nimbusvault.dto.request.LoginRequest;
 import com.mathan.nimbusvault.dto.request.RefreshTokenRequest;
 import com.mathan.nimbusvault.dto.request.RegisterRequest;
+import com.mathan.nimbusvault.dto.request.ResendEmailVerificationRequest;
 import com.mathan.nimbusvault.dto.response.AuthResponse;
 import com.mathan.nimbusvault.entity.PasswordResetOtp;
 import com.mathan.nimbusvault.entity.RefreshToken;
@@ -21,12 +31,15 @@ import com.mathan.nimbusvault.entity.User;
 import com.mathan.nimbusvault.enums.AuthProvider;
 import com.mathan.nimbusvault.enums.Role;
 import com.mathan.nimbusvault.exception.InvalidCredentialsException;
+import com.mathan.nimbusvault.exception.RateLimitExceededException;
+import com.mathan.nimbusvault.exception.ResourceNotFoundException;
 import com.mathan.nimbusvault.repository.UserRepository;
 import com.mathan.nimbusvault.entity.MobileVerificationOtp;
 import com.mathan.nimbusvault.dto.request.ResetPasswordRequest;
 import com.mathan.nimbusvault.repository.MobileVerificationOtpRepository;
 import com.mathan.nimbusvault.dto.request.VerifyMobileOtpRequest;
 import lombok.RequiredArgsConstructor;
+
 
 @Service
 @RequiredArgsConstructor
@@ -38,90 +51,130 @@ public class AuthService {
     private final RefreshTokenService refreshTokenService;
     private final PasswordResetOtpRepository passwordResetOtpRepository;
     private final MobileVerificationOtpRepository mobileVerificationOtpRepository;
+    private final MailService mailService;
+    private final RateLimitService rateLimitService;
+    private final EmailVerificationTokenRepository emailVerificationTokenRepository;
 
     private final SecureRandom secureRandom = new SecureRandom();
 
 
-@Transactional
-public void register(RegisterRequest request) {
+    @Transactional
+    public void register(RegisterRequest request) {
 
-    // 1. Check duplicate email or mobile number
-    if (userRepository.existsByEmail(request.getEmail())
-            || userRepository.existsByMobileNumber(request.getMobileNumber())) {
+        // 1. Check duplicate email or mobile number
+        if (userRepository.existsByEmail(request.getEmail())
+                || userRepository.existsByMobileNumber(request.getMobileNumber())) {
 
-        throw new RuntimeException("Email or mobile number already registered");
+            throw new RuntimeException("Email or mobile number already registered");
+        }
+
+        // 2. Encode password
+        String encodedPassword = passwordEncoder.encode(request.getPassword());
+
+        // 3. Create User object
+        User user = new User();
+
+        user.setName(request.getName());
+        user.setEmail(request.getEmail());
+        user.setPassword(encodedPassword);
+        user.setAuthProvider(AuthProvider.LOCAL);
+        user.setRole(Role.USER);
+        user.setMobileNumber(request.getMobileNumber());
+        user.setMobileVerified(false);
+
+        // 4. Save user
+        user = userRepository.save(user);
+
+        // 5. Generate email verification token
+        String emailToken = UUID.randomUUID().toString();
+
+        // 6. Create email verification token entity
+        EmailVerificationToken emailVerificationToken =
+                new EmailVerificationToken();
+
+        emailVerificationToken.setToken(emailToken);
+        emailVerificationToken.setUser(user);
+        emailVerificationToken.setExpiryDate(
+                LocalDateTime.now().plusMinutes(15));
+
+        // 7. Save email verification token
+        emailVerificationTokenRepository.save(emailVerificationToken);
+
+        // 8. Send verification email
+        mailService.sendEmailVerification(user.getEmail(), emailToken);
+
+        // 9. Generate mobile verification OTP
+        String otp = String.format(
+                "%06d",
+                secureRandom.nextInt(1_000_000));
+
+        // 10. Create MobileVerificationOtp object
+        MobileVerificationOtp mobileOtp = new MobileVerificationOtp();
+
+        mobileOtp.setOtp(otp);
+        mobileOtp.setUser(user);
+        mobileOtp.setExpiryDate(
+                LocalDateTime.now().plusMinutes(5));
+
+        // 11. Save mobile OTP
+        mobileVerificationOtpRepository.save(mobileOtp);
+
+        // 12. Temporary testing only
+        System.out.println("Mobile Verification OTP: " + otp);
     }
-
-    // 2. Encode password
-    String encodedPassword = passwordEncoder.encode(request.getPassword());
-
-    // 3. Create User object
-    User user = new User();
-
-    user.setName(request.getName());
-    user.setEmail(request.getEmail());
-    user.setPassword(encodedPassword);
-    user.setAuthProvider(AuthProvider.LOCAL);
-    user.setRole(Role.USER);
-    user.setMobileNumber(request.getMobileNumber());
-    user.setMobileVerified(false);
-
-    // 4. Save user
-    user = userRepository.save(user);
-
-    // 5. Generate 6-digit mobile verification OTP
-    String otp = String.format(
-            "%06d",
-            secureRandom.nextInt(1_000_000));
-
-    // 6. Create MobileVerificationOtp object
-    MobileVerificationOtp mobileOtp = new MobileVerificationOtp();
-
-    mobileOtp.setOtp(otp);
-    mobileOtp.setUser(user);
-    mobileOtp.setExpiryDate(
-            java.time.LocalDateTime.now().plusMinutes(5));
-
-    // 7. Save OTP
-    mobileVerificationOtpRepository.save(mobileOtp);
-
-    // 8. Temporary testing only
-    System.out.println("Mobile Verification OTP: " + otp);
-}
-
-
     @Transactional
     public AuthResponse login(LoginRequest request) {
 
+        // 1. Check login rate limit
+        if (!rateLimitService.allowLoginAttempt()) {
+            throw new RateLimitExceededException(
+                    "Too many login attempts. Please try again later."
+            );
+        }
+
+        // 2. Find user by email
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() ->
                         new InvalidCredentialsException(
-                                "Invalid email or password"));
+                                "Invalid email or password"
+                        ));
 
+        // 3. Check whether account is enabled
         if (!Boolean.TRUE.equals(user.getEnabled())) {
             throw new RuntimeException("Account is disabled");
         }
 
+        // 4. Check whether email is verified
+        if (!Boolean.TRUE.equals(user.getEmailVerified())) {
+            throw new RuntimeException(
+                    "Please verify your email before logging in"
+            );
+        }
+
+        // 5. Verify password
         if (!passwordEncoder.matches(
                 request.getPassword(), user.getPassword())) {
 
             throw new InvalidCredentialsException(
-                    "Invalid email or password");
+                    "Invalid email or password"
+            );
         }
 
+        // 6. Generate access token
         String accessToken =
                 jwtService.generateToken(user.getEmail());
 
+        // 7. Generate refresh token
         RefreshToken refreshToken =
                 refreshTokenService.createRefreshToken(user);
 
+        // 8. Return authentication response
         return new AuthResponse(
                 accessToken,
                 refreshToken.getToken(),
                 "Bearer"
         );
     }
-
     @Transactional
     public AuthResponse refreshAccessToken(RefreshTokenRequest request) {
 
@@ -209,7 +262,14 @@ public void register(RegisterRequest request) {
     @Transactional
     public String verifyMobileAndGenerateOtp(VerifyMobileRequest request) {
 
-        // 1. Check email and mobile number belong to the same user
+        // 1. Check rate limit
+        if (!rateLimitService.allowForgotPasswordAttempt()) {
+            throw new RateLimitExceededException(
+                    "Too many password reset attempts. Please try again later."
+            );
+        }
+
+        // 2. Check email and mobile number belong to the same user
         User user = userRepository
                 .findByEmailAndMobileNumber(
                         request.getEmail(),
@@ -217,29 +277,26 @@ public void register(RegisterRequest request) {
                 .orElseThrow(() ->
                         new RuntimeException("Invalid email or mobile number"));
 
-        // 2. Check mobile verification status
+        // 3. Check mobile verification status
         if (!Boolean.TRUE.equals(user.getMobileVerified())) {
             throw new RuntimeException("Mobile number is not verified");
         }
 
-        // 3. Generate six-digit OTP
+        // 4. Generate six-digit OTP
         String otp = String.format(
                 "%06d",
                 secureRandom.nextInt(1_000_000));
 
-        // 4. Create OTP entity
+        // 5. Create OTP entity
         PasswordResetOtp passwordResetOtp = new PasswordResetOtp();
-
         passwordResetOtp.setOtp(otp);
         passwordResetOtp.setUser(user);
         passwordResetOtp.setExpiryDate(
                 java.time.LocalDateTime.now().plusMinutes(5));
 
-        // 5. Save OTP
+        // 6. Save OTP and send email
         passwordResetOtpRepository.save(passwordResetOtp);
-
-        // Temporary testing only
-        System.out.println("Password reset OTP: " + otp);
+        mailService.sendPasswordResetOtp(user.getEmail(), otp);
 
         return "OTP generated successfully";
     }
@@ -374,6 +431,104 @@ public String changePassword(ChangePasswordRequest request, String email) {
     userRepository.save(user);
 
     return "Password changed successfully";
+}
+@Transactional
+public String resendMobileOtp(String email) {
+
+    // 1. Find the registered user
+    User user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+    // 2. Check whether mobile is already verified
+    if (Boolean.TRUE.equals(user.getMobileVerified())) {
+        throw new RuntimeException("Mobile number is already verified");
+    }
+
+    // 3. Invalidate previous unused OTPs
+    List<MobileVerificationOtp> oldOtps =
+            mobileVerificationOtpRepository.findByUserIdAndUsedFalse(user.getId());
+
+    for (MobileVerificationOtp oldOtp : oldOtps) {
+        oldOtp.setUsed(true);
+    }
+
+    // 4. Generate a new six-digit OTP
+    String otp = String.format("%06d",
+            secureRandom.nextInt(1_000_000));
+
+    // 5. Save the new OTP
+    MobileVerificationOtp mobileOtp = new MobileVerificationOtp();
+    mobileOtp.setOtp(otp);
+    mobileOtp.setUser(user);
+    mobileOtp.setExpiryDate(LocalDateTime.now().plusMinutes(5));
+
+    mobileVerificationOtpRepository.save(mobileOtp);
+
+    // 6. Print OTP for local testing
+    System.out.println("Mobile Verification OTP: " + otp);
+
+    return "New mobile verification OTP generated successfully";
+}
+@Transactional
+public String verifyEmail(String token) {
+
+    // 1. Find the verification token
+    EmailVerificationToken verificationToken =
+            emailVerificationTokenRepository.findByToken(token)
+                    .orElseThrow(() ->
+                            new RuntimeException("Invalid email verification link"));
+
+    // 2. Check whether the token was already used
+    if (verificationToken.isUsed()) {
+        throw new RuntimeException("Email verification link has already been used");
+    }
+
+    // 3. Check token expiry
+    if (verificationToken.getExpiryDate().isBefore(LocalDateTime.now())) {
+        throw new RuntimeException("Email verification link has expired");
+    }
+
+    // 4. Mark user's email as verified
+    User user = verificationToken.getUser();
+    user.setEmailVerified(true);
+
+    // 5. Mark token as used
+    verificationToken.setUsed(true);
+
+    return "Email verified successfully";
+}
+@Transactional
+public String resendEmailVerification(ResendEmailVerificationRequest request) {
+
+    // 1. Find user by email
+    User user = userRepository.findByEmail(request.getEmail())
+            .orElseThrow(() ->
+                    new RuntimeException("User not found"));
+
+    // 2. Check whether email is already verified
+    if (Boolean.TRUE.equals(user.getEmailVerified())) {
+        throw new RuntimeException("Email is already verified");
+    }
+
+    // 3. Generate a new verification token
+    String emailToken = UUID.randomUUID().toString();
+
+    // 4. Create a new verification token
+    EmailVerificationToken verificationToken =
+            new EmailVerificationToken();
+
+    verificationToken.setToken(emailToken);
+    verificationToken.setUser(user);
+    verificationToken.setExpiryDate(
+            LocalDateTime.now().plusMinutes(15));
+
+    // 5. Save the token
+    emailVerificationTokenRepository.save(verificationToken);
+
+    // 6. Send verification email
+    mailService.sendEmailVerification(user.getEmail(), emailToken);
+
+    return "New email verification link sent successfully";
 }
 
 }

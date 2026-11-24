@@ -1,5 +1,9 @@
 package com.mathan.nimbusvault.controller;
 
+import java.util.Map;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 import org.springframework.http.ResponseEntity;
 import com.mathan.nimbusvault.dto.request.VerifyMobileOtpRequest;
 import org.springframework.security.core.Authentication;
@@ -14,6 +18,7 @@ import com.mathan.nimbusvault.dto.request.ChangePasswordRequest;
 import com.mathan.nimbusvault.dto.request.CheckEmailRequest;
 import com.mathan.nimbusvault.dto.request.LoginRequest;
 import com.mathan.nimbusvault.dto.request.RegisterRequest;
+import com.mathan.nimbusvault.dto.request.ResendEmailVerificationRequest;
 import com.mathan.nimbusvault.dto.request.VerifyMobileRequest;
 import com.mathan.nimbusvault.dto.response.AuthResponse;
 import com.mathan.nimbusvault.service.AuthService;
@@ -101,5 +106,25 @@ public class AuthController {
         String response = authService.changePassword(request, email);
 
         return ResponseEntity.ok(response);
+    }
+    @PostMapping("/resend-mobile-otp")
+    public String resendMobileOtp(@RequestBody Map<String, String> request) {
+
+        String email = request.get("email");
+
+        return authService.resendMobileOtp(email);
+    }
+    @GetMapping("/verify-email")
+    public ResponseEntity<String> verifyEmail(
+            @RequestParam String token) {
+
+        return ResponseEntity.ok(
+                authService.verifyEmail(token));
+    }
+    @PostMapping("/resend-email-verification")
+    public ResponseEntity<String> resendEmailVerification(@Valid @RequestBody ResendEmailVerificationRequest request) {
+
+        return ResponseEntity.ok(
+                authService.resendEmailVerification(request));
     }
 }

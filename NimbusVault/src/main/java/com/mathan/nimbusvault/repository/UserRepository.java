@@ -1,5 +1,6 @@
 package com.mathan.nimbusvault.repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -16,6 +17,8 @@ public interface UserRepository extends JpaRepository<User, UUID>{
     boolean existsByMobileNumber(String mobileNumber);
     
     Optional<User> findByEmailAndMobileNumber(String email, String mobileNumber);
+    
+    List<User> findAll();
     
     
 

@@ -44,9 +44,24 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidCredentialsException.class)
     public ResponseEntity<String> handleInvalidCredentials(
             InvalidCredentialsException ex) {
-
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
+                .body(ex.getMessage());
+    }
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<String> handleResourceNotFound(
+            ResourceNotFoundException ex) {
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ex.getMessage());
+    }
+    @ExceptionHandler(RateLimitExceededException.class)
+    public ResponseEntity<String> handleRateLimitExceeded(
+            RateLimitExceededException ex) {
+
+        return ResponseEntity
+                .status(HttpStatus.TOO_MANY_REQUESTS)
                 .body(ex.getMessage());
     }
 }
