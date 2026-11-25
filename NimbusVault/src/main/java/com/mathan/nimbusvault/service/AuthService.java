@@ -514,8 +514,7 @@ public String resendEmailVerification(ResendEmailVerificationRequest request) {
     String emailToken = UUID.randomUUID().toString();
 
     // 4. Create a new verification token
-    EmailVerificationToken verificationToken =
-            new EmailVerificationToken();
+    EmailVerificationToken verificationToken =new EmailVerificationToken();
 
     verificationToken.setToken(emailToken);
     verificationToken.setUser(user);

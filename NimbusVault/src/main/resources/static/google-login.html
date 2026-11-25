@@ -1,0 +1,76 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>NimbusVault - Google Login</title>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+
+    <h2>Welcome to NimbusVault</h2>
+    <p>Sign in using your Google account.</p>
+
+    <div id="googleButton"></div>
+
+    <p id="message"></p>
+
+    <script>
+        window.onload = function () {
+
+            google.accounts.id.initialize({
+                client_id: "276867392818-lke1em4n7ve21kiv9mfm5ip76hbrvhak.apps.googleusercontent.com",
+                callback: handleGoogleLogin
+            });
+
+            google.accounts.id.renderButton(
+                document.getElementById("googleButton"),
+                {
+                    theme: "outline",
+                    size: "large",
+                    text: "signin_with"
+                }
+            );
+        };
+
+        async function handleGoogleLogin(response) {
+
+            document.getElementById("message").innerText =
+                "Logging in...";
+
+            try {
+                const result = await fetch(
+                    "http://localhost:8080/api/v1/auth/google",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            idToken: response.credential
+                        })
+                    }
+                );
+
+                const data = await result.json();
+
+                if (!result.ok) {
+                    throw new Error(data.message || "Google login failed");
+                }
+
+                document.getElementById("message").innerText =
+                    "Google login successful!";
+
+                console.log("NimbusVault Authentication:", data);
+
+            } catch (error) {
+
+                document.getElementById("message").innerText =
+                    error.message;
+
+                console.error(error);
+            }
+        }
+    </script>
+
+</body>
+</html>
