@@ -61,9 +61,7 @@ public class GoogleAuthService {
         }
 
         // 4. Check existing Google account
-        Optional<UserAuthProvider> existingProvider =
-                userAuthProviderRepository.findByProviderAndProviderId(
-                        AuthProvider.GOOGLE, googleId);
+        Optional<UserAuthProvider> existingProvider = userAuthProviderRepository.findByProviderAndProviderId(AuthProvider.GOOGLE, googleId);
 
         User user;
 
@@ -88,11 +86,13 @@ public class GoogleAuthService {
         }
 
         // 7. Generate NimbusVault access token
+        if (!Boolean.TRUE.equals(user.getEnabled())) {
+            throw new IllegalArgumentException("Account is disabled");
+        }
         String accessToken = jwtService.generateToken(user.getEmail());
 
         // 8. Generate refresh token
-        RefreshToken refreshToken =
-                refreshTokenService.createRefreshToken(user);
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
 
         // 9. Return authentication response
         return new AuthResponse(
@@ -102,8 +102,7 @@ public class GoogleAuthService {
         );
     }
 
-    private User createGoogleUser(
-            String name, String email, String googleId) {
+    private User createGoogleUser(String name, String email, String googleId) {
 
         User user = new User();
 

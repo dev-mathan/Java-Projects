@@ -53,4 +53,24 @@ public class MailService {
 
         mailSender.send(message);
     }
+ // Google account linking OTP email
+    public void sendGoogleLinkOtp(String email, String otp) {
+
+        SimpleMailMessage message = new SimpleMailMessage();
+
+        message.setTo(email);
+        message.setSubject("NimbusVault - Google Account Linking OTP");
+
+        message.setText(
+                "Hello,\n\n" +
+                "We received a request to link your Google account " +
+                "with your NimbusVault account.\n\n" +
+                "Your verification OTP is: " + otp + "\n\n" +
+                "This OTP is valid for 5 minutes.\n\n" +
+                "If you did not request this, please ignore this email.\n\n" +
+                "Regards,\nNimbusVault Team"
+        );
+
+        mailSender.send(message);
+    }
 }
