@@ -60,22 +60,32 @@ public class GoogleAuthService {
                     "Google email is not verified");
         }
 
-        // 4. Check existing Google account
-        Optional<UserAuthProvider> existingProvider = userAuthProviderRepository.findByProviderAndProviderId(AuthProvider.GOOGLE, googleId);
+        // 4. Check whether this Google account is already linked
+        Optional<UserAuthProvider> existingProvider =
+                userAuthProviderRepository.findByProviderAndProviderId(
+                        AuthProvider.GOOGLE, googleId);
 
         User user;
 
         if (existingProvider.isPresent()) {
 
+            // Use the existing linked account
             user = existingProvider.get().getUser();
 
         } else {
 
-            // 5. Find existing NimbusVault user by email
-            user = userRepository.findByEmail(email)
-                    .orElseGet(() -> createGoogleUser(name, email, googleId));
+            // 5. Check whether a NimbusVault account already exists
+            Optional<User> existingUser = userRepository.findByEmail(email);
 
-            // 6. Link Google account
+            if (existingUser.isPresent()) {
+                throw new IllegalArgumentException(
+                        "Account already exists. Please use OTP verification to link Google.");
+            }
+
+            // 6. Create a new Google account
+            user = createGoogleUser(name, email);
+
+            // 7. Save Google provider details
             UserAuthProvider provider = new UserAuthProvider();
 
             provider.setUser(user);
@@ -85,16 +95,19 @@ public class GoogleAuthService {
             userAuthProviderRepository.save(provider);
         }
 
-        // 7. Generate NimbusVault access token
+        // 8. Check whether account is enabled
         if (!Boolean.TRUE.equals(user.getEnabled())) {
             throw new IllegalArgumentException("Account is disabled");
         }
+
+        // 9. Generate access token
         String accessToken = jwtService.generateToken(user.getEmail());
 
-        // 8. Generate refresh token
-        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
+        // 10. Generate refresh token
+        RefreshToken refreshToken =
+                refreshTokenService.createRefreshToken(user);
 
-        // 9. Return authentication response
+        // 11. Return authentication response
         return new AuthResponse(
                 accessToken,
                 refreshToken.getToken(),
@@ -102,14 +115,14 @@ public class GoogleAuthService {
         );
     }
 
-    private User createGoogleUser(String name, String email, String googleId) {
+    // Create a new Google user
+    private User createGoogleUser(String name, String email) {
 
         User user = new User();
 
         user.setName(name);
         user.setEmail(email);
         user.setAuthProvider(AuthProvider.GOOGLE);
-        user.setProviderId(googleId);
         user.setRole(Role.USER);
         user.setEmailVerified(true);
         user.setEnabled(true);

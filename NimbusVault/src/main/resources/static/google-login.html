@@ -38,6 +38,12 @@
         };
 
         async function handleGoogleLogin(response) {
+        	
+        	// Display Google ID Token
+            console.log("Google ID Token:", response.credential);
+
+            document.getElementById("message").innerText =
+                "Logging in...";
 
             document.getElementById("message").innerText =
                 "Logging in...";

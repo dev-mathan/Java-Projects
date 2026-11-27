@@ -27,20 +27,20 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
 
             .authorizeHttpRequests(auth -> auth
-            		.requestMatchers(
-            			    "/google-login.html",
-            			    "/api/v1/auth/register",
-            			    "/api/v1/auth/login",
-            			    "/api/v1/auth/refresh-token",
-            			    "/api/v1/auth/verify-email",
-            			    "/api/v1/auth/google",
-            			    "/api/v1/auth/forgot-password",
-            			    "/api/v1/auth/forgot-password/**",
-            			    "/api/v1/auth/verify-mobile-otp",
-            			    "/api/v1/auth/reset-password",
-            			    "/api/v1/auth/resend-mobile-otp",
-            			    "/api/v1/auth/resend-email-verification"
-            			).permitAll()
+            	    .requestMatchers(
+            	        "/google-login.html",
+            	        "/api/v1/auth/register",
+            	        "/api/v1/auth/login",
+            	        "/api/v1/auth/refresh-token",
+            	        "/api/v1/auth/verify-email",
+            	        "/api/v1/auth/forgot-password",
+            	        "/api/v1/auth/forgot-password/**",
+            	        "/api/v1/auth/verify-mobile-otp",
+            	        "/api/v1/auth/reset-password",
+            	        "/api/v1/auth/resend-mobile-otp",
+            	        "/api/v1/auth/resend-email-verification",
+            	        "/api/v1/auth/google"
+            	    ).permitAll()
             	    .anyRequest().authenticated()
             	)
 
