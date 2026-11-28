@@ -114,8 +114,7 @@ public class GoogleLinkOtpService {
         googleLinkOtp.setUser(user);
         googleLinkOtp.setGoogleId(googleId);
         googleLinkOtp.setOtp(otp);
-        googleLinkOtp.setExpiryDate(
-                LocalDateTime.now().plusMinutes(5));
+        googleLinkOtp.setExpiryDate(LocalDateTime.now().plusMinutes(5));
 
         googleLinkOtpRepository.save(googleLinkOtp);
 
