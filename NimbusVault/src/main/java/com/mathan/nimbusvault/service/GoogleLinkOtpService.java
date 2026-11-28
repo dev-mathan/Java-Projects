@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.security.core.Authentication;
@@ -92,6 +93,16 @@ public class GoogleLinkOtpService {
             throw new IllegalArgumentException(
                     "This Google account is already linked");
         }
+        // Invalidate all previous OTPs
+        List<GoogleLinkOtp> previousOtps =
+                googleLinkOtpRepository.findByUserIdAndGoogleIdAndUsedFalse(
+                        user.getId(), googleId);
+
+        for (GoogleLinkOtp previousOtp : previousOtps) {
+            previousOtp.setUsed(true);
+        }
+
+        googleLinkOtpRepository.saveAll(previousOtps);
 
         // 7. Generate six-digit OTP
         String otp = String.format(

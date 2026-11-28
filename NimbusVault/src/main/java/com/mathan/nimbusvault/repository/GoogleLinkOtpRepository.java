@@ -1,6 +1,7 @@
 
 package com.mathan.nimbusvault.repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -10,9 +11,12 @@ import com.mathan.nimbusvault.entity.GoogleLinkOtp;
 
 public interface GoogleLinkOtpRepository extends JpaRepository<GoogleLinkOtp, UUID> {
 
-Optional<GoogleLinkOtp> findFirstByUserIdAndGoogleIdAndOtpAndUsedFalseOrderByCreatedAtDesc(
-        UUID userId,
-        String googleId,
-        String otp);
+    Optional<GoogleLinkOtp> findFirstByUserIdAndGoogleIdAndOtpAndUsedFalseOrderByCreatedAtDesc(
+            UUID userId,
+            String googleId,
+            String otp);
 
+    List<GoogleLinkOtp> findByUserIdAndGoogleIdAndUsedFalse(
+            UUID userId,
+            String googleId);
 }
